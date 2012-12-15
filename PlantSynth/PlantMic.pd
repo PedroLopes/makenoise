@@ -1,0 +1,139 @@
+#N canvas 231 301 1440 852 10;
+#X declare -lib mrpeach;
+#X obj 222 84 adc~ 1 2;
+#X obj 333 163 env~;
+#X floatatom 343 202 5 0 0 0 - - -;
+#X obj 390 100 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 5106 1;
+#X obj 408 163 env~;
+#X floatatom 418 202 5 0 0 0 - - -;
+#X obj 465 100 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 3445 1;
+#X obj 224 155 hip~ 300;
+#X obj 221 119 hip~ 300;
+#X obj 242 189 bp~ 1000 1;
+#N canvas 0 22 450 300 filterChain 0;
+#X obj 172 77 inlet~;
+#X obj 174 147 hip~ 300;
+#X obj 171 111 hip~ 300;
+#X obj 167 198 outlet~;
+#X connect 0 0 2 0;
+#X connect 1 0 3 0;
+#X connect 2 0 1 0;
+#X restore 238 251 pd filterChain;
+#X obj 269 381 dac~ 1 2;
+#X obj 259 319 *~ 1;
+#X obj 414 293 vsl 15 128 0 3 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 7600 1;
+#X obj 316 433 throw~ nha;
+#N canvas 0 22 1440 852 detect 1;
+#X obj 140 321 spigot;
+#X msg 242 122 bang;
+#X obj 241 283 bonk~;
+#X msg 241 186 print;
+#X obj 163 257 adc~;
+#X obj 58 321 spigot;
+#X msg 241 -33 mask 4 0.7;
+#X text 336 -51 Describes how energy in each frequency band masks later
+energy in the band. Here the masking is total for 4 analysis periods
+and then drops by 0.7 each period.;
+#X text 286 115 Poll the current spectrum via "raw" outlet \, You can
+set a very high threshold if you don't want attacks mixed in.;
+#X msg 241 160 debug 0;
+#X text 319 160 turn debugging on or off.;
+#X obj 107 322 tgl 15 0 empty empty empty 0 -6 0 8 -262144 -1 -1 0
+1;
+#X obj 189 322 tgl 15 0 empty empty empty 0 -6 0 8 -262144 -1 -1 0
+1;
+#X obj 140 351 print cooked;
+#X obj 58 351 print raw;
+#X text 318 31 Minimum "velocity" to output (quieter notes are ignored.)
+;
+#X obj 243 310 s bonk-cooked;
+#X text 338 -136 Set low and high thresholds. Signal growth must exceed
+the high one and then fall to the low one to make an attack. The unit
+is the sum of the proportional growth in the 11 filter bands. Proportional
+growth is essentially the logarithmic time derivative.;
+#X msg 241 213 print 1;
+#X text 309 215 print out filterbank settings;
+#N canvas 660 173 579 589 templates 1;
+#X msg 76 197 learn 0;
+#X msg 76 227 forget;
+#X msg 76 287 read templates.txt;
+#X msg 76 107 debounce 0;
+#X msg 76 137 learn 10;
+#X obj 62 431 outlet;
+#X text 155 133 Forget all templates and start learning new ones. The
+argument gives the number of times you will hit each instrument (10
+recommended.) Turn on the output volume above for audible feedback
+as you train Bonk. "Learn 0" exits learn mode.;
+#X text 155 217 Forget the last template. In Learn mode \, use "forget"
+to erase and record over a template.;
+#X text 220 253 Write templates to a file in text-editable format.
+;
+#X text 221 283 Read templates from a file.;
+#X text 157 104 Minimum time (msec) between attacks in learn mode;
+#X msg 76 257 write ~/templates.txt;
+#X connect 0 0 5 0;
+#X connect 1 0 5 0;
+#X connect 2 0 5 0;
+#X connect 3 0 5 0;
+#X connect 4 0 5 0;
+#X connect 11 0 5 0;
+#X restore 258 250 pd templates;
+#X msg 241 -103 thresh 2.5 5;
+#X msg 241 2 attack-frames 1;
+#X text 366 3 number of frames over which to measure growth;
+#X text 363 251 more messages for managing templates;
+#X msg 241 30 minvel 7;
+#X msg 241 57 spew 0;
+#X text 308 59 Turn spew mode on/off;
+#X msg 241 84 useloudness 0;
+#X text 355 83 experimental: use alternative loudness units;
+#X text 310 185 Print out settings and templates.;
+#X obj 146 220 catch~ nha;
+#X connect 0 0 13 0;
+#X connect 1 0 2 0;
+#X connect 2 0 5 0;
+#X connect 2 1 0 0;
+#X connect 2 1 16 0;
+#X connect 3 0 2 0;
+#X connect 5 0 14 0;
+#X connect 6 0 2 0;
+#X connect 9 0 2 0;
+#X connect 11 0 5 1;
+#X connect 12 0 0 1;
+#X connect 18 0 2 0;
+#X connect 20 0 2 0;
+#X connect 21 0 2 0;
+#X connect 22 0 2 0;
+#X connect 25 0 2 0;
+#X connect 26 0 2 0;
+#X connect 28 0 2 0;
+#X connect 31 0 2 0;
+#X restore 536 272 pd detect;
+#X floatatom 432 445 5 0 0 0 - - -;
+#X obj 786 346 import mrpeach;
+#X obj 868 396 packOSC;
+#N canvas 0 22 450 300 masterTimer 0;
+#X obj 88 72 udpreceive 13000;
+#X obj 135 117 unpackOSC;
+#X obj 146 156 print nha;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X restore 611 98 pd masterTimer;
+#X connect 0 0 1 0;
+#X connect 0 0 8 0;
+#X connect 1 0 2 0;
+#X connect 1 0 3 0;
+#X connect 4 0 5 0;
+#X connect 4 0 6 0;
+#X connect 7 0 4 0;
+#X connect 7 0 10 0;
+#X connect 8 0 7 0;
+#X connect 10 0 12 0;
+#X connect 12 0 11 0;
+#X connect 12 0 11 1;
+#X connect 12 0 14 0;
+#X connect 13 0 12 1;
+#X connect 13 0 16 0;

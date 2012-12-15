@@ -1,0 +1,309 @@
+#N canvas -4 22 1440 852 10;
+#X declare -lib mrpeach;
+#X obj 43 105 adc~ 1 2;
+#X obj 154 184 env~;
+#X floatatom 164 223 5 0 0 0 - - -;
+#X obj 211 121 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 229 184 env~;
+#X floatatom 239 223 5 0 0 0 - - -;
+#X obj 286 121 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 45 176 hip~ 300;
+#X obj 42 140 hip~ 300;
+#X obj 63 210 bp~ 1000 1;
+#N canvas 0 22 450 300 filterChain 0;
+#X obj 172 77 inlet~;
+#X obj 174 147 hip~ 300;
+#X obj 171 111 hip~ 300;
+#X obj 167 198 outlet~;
+#X connect 0 0 2 0;
+#X connect 1 0 3 0;
+#X connect 2 0 1 0;
+#X restore 59 272 pd filterChain;
+#X obj 90 402 dac~ 1 2;
+#X obj 80 340 *~ 1;
+#X obj 235 314 vsl 15 128 0 3 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 12700 1;
+#X obj 137 454 throw~ nha;
+#N canvas 442 408 1440 852 detect 0;
+#X obj 140 321 spigot;
+#X msg 242 122 bang;
+#X obj 241 283 bonk~;
+#X msg 241 186 print;
+#X obj 163 257 adc~;
+#X obj 58 321 spigot;
+#X msg 241 -33 mask 4 0.7;
+#X text 336 -51 Describes how energy in each frequency band masks later
+energy in the band. Here the masking is total for 4 analysis periods
+and then drops by 0.7 each period.;
+#X text 286 115 Poll the current spectrum via "raw" outlet \, You can
+set a very high threshold if you don't want attacks mixed in.;
+#X msg 241 160 debug 0;
+#X text 319 160 turn debugging on or off.;
+#X obj 107 322 tgl 15 0 empty empty empty 0 -6 0 8 -262144 -1 -1 0
+1;
+#X obj 189 322 tgl 15 0 empty empty empty 0 -6 0 8 -262144 -1 -1 0
+1;
+#X obj 140 351 print cooked;
+#X obj 58 351 print raw;
+#X text 318 31 Minimum "velocity" to output (quieter notes are ignored.)
+;
+#X obj 243 310 s bonk-cooked;
+#X text 338 -136 Set low and high thresholds. Signal growth must exceed
+the high one and then fall to the low one to make an attack. The unit
+is the sum of the proportional growth in the 11 filter bands. Proportional
+growth is essentially the logarithmic time derivative.;
+#X msg 241 213 print 1;
+#X text 309 215 print out filterbank settings;
+#N canvas 938 348 579 589 templates 0;
+#X msg 76 197 learn 0;
+#X msg 76 227 forget;
+#X msg 76 287 read templates.txt;
+#X msg 76 107 debounce 0;
+#X msg 76 137 learn 10;
+#X obj 62 431 outlet;
+#X text 155 133 Forget all templates and start learning new ones. The
+argument gives the number of times you will hit each instrument (10
+recommended.) Turn on the output volume above for audible feedback
+as you train Bonk. "Learn 0" exits learn mode.;
+#X text 155 217 Forget the last template. In Learn mode \, use "forget"
+to erase and record over a template.;
+#X text 220 253 Write templates to a file in text-editable format.
+;
+#X text 221 283 Read templates from a file.;
+#X text 157 104 Minimum time (msec) between attacks in learn mode;
+#X msg 76 257 write ~/templates.txt;
+#X connect 0 0 5 0;
+#X connect 1 0 5 0;
+#X connect 2 0 5 0;
+#X connect 3 0 5 0;
+#X connect 4 0 5 0;
+#X connect 11 0 5 0;
+#X restore 258 250 pd templates;
+#X msg 241 -103 thresh 2.5 5;
+#X msg 241 2 attack-frames 1;
+#X text 366 3 number of frames over which to measure growth;
+#X text 363 251 more messages for managing templates;
+#X msg 241 30 minvel 7;
+#X msg 241 57 spew 0;
+#X text 308 59 Turn spew mode on/off;
+#X msg 241 84 useloudness 0;
+#X text 355 83 experimental: use alternative loudness units;
+#X text 310 185 Print out settings and templates.;
+#X obj 146 220 catch~ nha;
+#X connect 0 0 13 0;
+#X connect 1 0 2 0;
+#X connect 2 0 5 0;
+#X connect 2 1 0 0;
+#X connect 2 1 16 0;
+#X connect 3 0 2 0;
+#X connect 5 0 14 0;
+#X connect 6 0 2 0;
+#X connect 9 0 2 0;
+#X connect 11 0 5 1;
+#X connect 12 0 0 1;
+#X connect 18 0 2 0;
+#X connect 20 0 2 0;
+#X connect 21 0 2 0;
+#X connect 22 0 2 0;
+#X connect 25 0 2 0;
+#X connect 26 0 2 0;
+#X connect 28 0 2 0;
+#X connect 31 0 2 0;
+#X restore 555 70 pd detect;
+#X floatatom 253 466 5 0 0 0 - - -;
+#X obj 554 40 import mrpeach;
+#N canvas 0 48 1440 852 masterTimer 0;
+#X obj 519 137 unpackOSC;
+#X obj 104 148 nbx 2 180 -1e+37 1e+37 0 0 empty empty : 340 70 0 150
+-1 -262144 -33289 0 256;
+#X obj 105 342 nbx 2 180 -1e+37 1e+37 0 0 empty empty : 340 70 0 150
+-1 -262144 -33289 34 256;
+#X obj 105 527 nbx 2 180 -1e+37 1e+37 0 0 empty empty empty 45 9 0
+150 -1 -262144 -33289 48 256;
+#X obj 523 241 unpack f f f;
+#X obj 639 180 routeOSC /time;
+#X floatatom 530 277 5 0 0 0 - - -;
+#X floatatom 593 279 5 0 0 0 - - -;
+#X floatatom 654 279 5 0 0 0 - - -;
+#X obj 520 182 print nha;
+#X obj 472 93 udpreceive 13000;
+#X obj 599 341 moses 6;
+#X obj 112 736 tgl 30 0 empty empty silence 40 7 0 10 -204800 -1 -1
+5 5;
+#X obj 231 737 tgl 30 0 empty empty play 40 7 0 10 -4034 -1 -1 34 34
+;
+#X connect 0 0 5 0;
+#X connect 0 0 9 0;
+#X connect 4 0 6 0;
+#X connect 4 0 1 0;
+#X connect 4 1 7 0;
+#X connect 4 1 2 0;
+#X connect 4 2 8 0;
+#X connect 4 2 3 0;
+#X connect 5 0 4 0;
+#X connect 7 0 11 0;
+#X connect 10 0 0 0;
+#X connect 10 0 9 0;
+#X connect 11 0 12 0;
+#X connect 11 1 13 0;
+#X coords 0 -1 1 1 400 800 1 100 100;
+#X restore 866 24 pd masterTimer;
+#X obj -42 388 r PlantVibro;
+#X obj 94 428 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 11400 1;
+#X obj -85 481 mavg 10;
+#X obj 239 576 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj -92 579 print mavg;
+#X obj 39 531 moses 40;
+#X obj 379 490 dac~;
+#X floatatom 431 264 5 -100 500 0 - - -;
+#X floatatom 459 289 5 -100 500 0 - - -;
+#X floatatom 482 316 5 -100 500 0 - - -;
+#X floatatom 498 343 5 0 0 0 - - -;
+#X floatatom 565 371 5 -100 500 0 - - -;
+#X obj 521 373 / 100;
+#X text 476 263 attack [ min=1.0 \, default= 10 ];
+#X text 503 288 sustain [ min=0.0 \, default=2.0 ];
+#X text 526 315 decay [ min=1.0 \, default = 50 ];
+#X text 542 342 size [ min=1.0 \, default = 700 ];
+#X obj 395 397 beatify~ -------------;
+#X obj 396 201 osc~ 70;
+#X obj 391 453 *~ 0.1;
+#X obj 482 418 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 4100 1;
+#X obj 10 429 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 6830 1;
+#X obj -90 544 spigot;
+#X obj -65 515 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 562 548 +~;
+#X obj 563 668 output~;
+#X obj 697 591 / 100;
+#X floatatom 697 571 5 0 500 0 - - -;
+#X obj 561 601 clip~ -1 1;
+#X floatatom 585 501 5 0 0 0 - - -;
+#X obj 585 523 osc~ 200;
+#X obj 561 575 *~;
+#X obj 585 455 loadbang;
+#X msg 697 547 50;
+#X obj 697 523 loadbang;
+#X text 637 500 <-- frequency of second tone;
+#X obj 561 429 osc~ 300;
+#X msg 585 478 225;
+#X floatatom 566 402 5 0 0 0 - - -;
+#X obj 700 648 spigot~;
+#X obj 745 620 tgl 15 0 empty empty empty 17 7 0 10 -203904 -1 -1 0
+1;
+#X obj 357 632 spigot;
+#X obj 394 600 tgl 15 0 empty empty empty 17 7 0 10 -203904 -1 -1 0
+1;
+#X obj 155 357 spigot~;
+#X obj 188 325 tgl 15 0 empty empty empty 17 7 0 10 -4034 -1 -1 0 1
+;
+#X obj 562 642 spigot~;
+#X obj 632 620 tgl 15 0 empty empty empty 17 7 0 10 -4034 -1 -1 1 1
+;
+#X obj 546 149 tgl 40 0 empty empty empty 17 7 0 10 -258113 -1 -1 1
+1;
+#X obj 547 205 s masterClose;
+#X obj 639 582 r masterClose;
+#X obj 185 301 r masterClose;
+#N canvas 435 214 450 300 keys 0;
+#X obj 168 46 key;
+#X obj 168 159 s one;
+#X obj 169 84 == 49;
+#X obj 221 83 == 50;
+#X obj 160 109 moses 1;
+#X obj 200 192 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 164 194 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 219 111 moses 1;
+#X obj 259 194 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 223 196 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 227 162 s two;
+#X obj 177 135 bang;
+#X obj 240 137 bang;
+#X connect 0 0 2 0;
+#X connect 0 0 3 0;
+#X connect 2 0 4 0;
+#X connect 3 0 7 0;
+#X connect 4 0 6 0;
+#X connect 4 1 5 0;
+#X connect 4 1 11 0;
+#X connect 7 0 9 0;
+#X connect 7 1 8 0;
+#X connect 7 1 12 0;
+#X connect 11 0 1 0;
+#X connect 12 0 10 0;
+#X restore 554 93 pd keys;
+#X obj 637 556 r two;
+#X obj 185 280 r one;
+#X connect 0 0 1 0;
+#X connect 0 0 8 0;
+#X connect 1 0 2 0;
+#X connect 1 0 3 0;
+#X connect 4 0 5 0;
+#X connect 4 0 6 0;
+#X connect 7 0 4 0;
+#X connect 7 0 10 0;
+#X connect 8 0 7 0;
+#X connect 10 0 12 0;
+#X connect 12 0 14 0;
+#X connect 12 0 62 0;
+#X connect 13 0 12 1;
+#X connect 13 0 16 0;
+#X connect 19 0 21 0;
+#X connect 19 0 48 0;
+#X connect 20 0 37 1;
+#X connect 21 0 24 0;
+#X connect 21 0 41 0;
+#X connect 21 0 40 0;
+#X connect 22 0 60 0;
+#X connect 24 1 22 0;
+#X connect 26 0 36 1;
+#X connect 27 0 36 2;
+#X connect 28 0 36 3;
+#X connect 29 0 36 4;
+#X connect 30 0 31 0;
+#X connect 31 0 36 5;
+#X connect 36 0 38 0;
+#X connect 37 0 36 0;
+#X connect 38 0 64 0;
+#X connect 39 0 38 1;
+#X connect 40 0 24 1;
+#X connect 40 0 55 0;
+#X connect 41 0 23 0;
+#X connect 42 0 41 1;
+#X connect 43 0 50 0;
+#X connect 45 0 50 1;
+#X connect 46 0 45 0;
+#X connect 47 0 64 0;
+#X connect 48 0 49 0;
+#X connect 49 0 43 1;
+#X connect 50 0 58 0;
+#X connect 51 0 56 0;
+#X connect 52 0 46 0;
+#X connect 53 0 52 0;
+#X connect 55 0 43 0;
+#X connect 56 0 48 0;
+#X connect 57 0 55 1;
+#X connect 58 0 47 0;
+#X connect 59 0 58 1;
+#X connect 60 0 59 0;
+#X connect 61 0 60 1;
+#X connect 61 0 59 0;
+#X connect 62 0 11 1;
+#X connect 63 0 62 1;
+#X connect 64 0 44 0;
+#X connect 65 0 64 1;
+#X connect 66 0 67 0;
+#X connect 68 0 65 0;
+#X connect 69 0 63 0;
+#X connect 71 0 65 0;
+#X connect 72 0 63 0;
